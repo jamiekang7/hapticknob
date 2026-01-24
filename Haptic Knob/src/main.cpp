@@ -1,18 +1,60 @@
 #include <Arduino.h>
+#include <SimpleFOC.h>
 
-// put function declarations here:
-int myFunction(int, int);
+// Pin declarations
+#define PIN_UH 25
+#define PIN_UL 33
+#define PIN_VH 27
+#define PIN_VL 26
+#define PIN_WH 12
+#define PIN_WL 14
+#define PIN_EN 32
+
+//4 pole pairs, 8 poles total
+BLDCMotor motor = BLDCMotor(4); // set up for 4 pole pairs
+// BLDCDriver6PWM( int phA_h, int phA_l, int phB_h, int phB_l, int phC_h, int phC_l, int en)
+BLDCDriver6PWM driver = BLDCDriver6PWM(PIN_UH, PIN_UL, PIN_VH, PIN_VL, PIN_WH, PIN_WL, PIN_EN); 
+
+// Max Voltage: 6-8V (7.4V nominasl, use 6V for safety)
+// 5-10% PWM Duty Cycle (to be safe)
 
 void setup() {
-  // put your setup code here, to run once:
-  int result = myFunction(2, 3);
+ 
+  // PWM frequency
+  driver.pwm_frequency = 25000;
+
+  // dead_zone [0,1] - default 0.02 - 2%
+  driver.dead_zone = 0.05; // default set up
+  driver.dead_time = 1/driver.pwm_frequency * driver.dead_zone;
+
+  // Driver Voltages
+  driver.voltage_limit = 5;
+  driver.voltage_power_supply = 3.3;
+   
+  //linking motor to driver
+
+  Serial.print("Driver init ");
+  // init driver
+  if (driver.init())  Serial.println("success!");
+  else{
+    Serial.println("failed!");
+    return;
 }
+    motor.linkDriver(&driver);
+    motor.controller = MotionControlType::voltage;
+    
+    motor.init()
+  _delay(1000);
+
+
+}
+  
+float target_voltage = 2;
 
 void loop() {
   // put your main code here, to run repeatedly:
-}
-
-// put function definitions here:
-int myFunction(int x, int y) {
-  return x + y;
+  
+  //FOC algorithm execution
+  
+  motor.move(target_voltage);
 }
