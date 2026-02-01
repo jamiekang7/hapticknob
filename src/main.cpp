@@ -26,7 +26,7 @@ void doLimitCurrent(char* cmd) { command.scalar(&motor.current_limit, cmd); }
 void setup() {
   
   // PWM frequency
-  driver.pwm_frequency = 30000;
+  driver.pwm_frequency = 30000;//default 30k HZ, max 50kHZ
 
   // dead_zone [0,1] - default 0.02 - 2%
   driver.dead_zone = 0.05; // default set up
@@ -35,7 +35,8 @@ void setup() {
   // Driver Voltages
   driver.voltage_limit = 5;
   driver.voltage_power_supply = 3.3;
-   
+  driver.init();
+  
   // limiting voltage 
   motor.voltage_limit = 3;   // Volts
   // or current  - if phase resistance provided
